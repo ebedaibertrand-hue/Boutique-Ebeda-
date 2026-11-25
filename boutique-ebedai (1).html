@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boutique Ebedaï — Livraison à Garoua, Guider, Figuil, Mayo-Oulo, Maroua, Ngaoundéré</title>
+<meta name="description" content="Boutique en ligne d'Ebedaï Bertrand. Commandez par WhatsApp, payez par MTN MoMo, Orange Money ou à la livraison. Livraison dans le Grand Nord et l'Adamaoua.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  body{font-family:'Inter',sans-serif;background:#faf8f5}
+  h1,h2,h3,.fd{font-family:'Plus Jakarta Sans',sans-serif}
+  .no-scrollbar::-webkit-scrollbar{display:none}
+  .no-scrollbar{scrollbar-width:none}
+</style>
+</head>
+<body class="text-slate-800 antialiased">
+
+<script>
+/* =====================================================================
+   ✏️  CONFIGURATION — MODIFIEZ ICI VOS INFOS, PRODUITS ET PRIX
+   ===================================================================== */
+const CONFIG = {
+  shopName: "Boutique Ebedaï",
+  owner: "Ebedaï Bertrand",
+  whatsapp: "237690450637",          // numéro WhatsApp avec indicatif, sans +
+  whatsappDisplay: "+237 690 45 06 37",
+  // Numéros où le client doit envoyer l'argent (laissez "" pour que
+  // vous les donniez vous-même par WhatsApp après la commande)
+  momoNumber: "674589674",           // MTN MoMo
+  omNumber: "699032741",             // Orange Money
+  momoName: "Ebedaï Bertrand"        // nom affiché sur le compte
+};
+
+const CITIES = [   // frais de livraison en FCFA (à ajuster)
+  { name: "Garoua",    fee: 1000 },
+  { name: "Guider",    fee: 2000 },
+  { name: "Figuil",    fee: 2500 },
+  { name: "Mayo-Oulo", fee: 2500 },
+  { name: "Maroua",    fee: 3000 },
+  { name: "Ngaoundéré",fee: 4000 }
+];
+
+const CATEGORIES = ["Tout","Électronique","Mode","Maison","Beauté"];
+
+// Remplacez "image" par le lien de VOS photos (ou un fichier du même dossier, ex: "photos/telephone.jpg")
+const PRODUCTS = [
+  { id:1, name:"Smartphone Samsung Galaxy A15 (128 Go)", price:95000, oldPrice:110000, category:"Électronique", badge:"Best-seller",
+    image:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=700&q=80",
+    description:"Grand écran, double SIM, appareil photo 50MP, batterie longue durée. Garantie 6 mois." },
+  { id:2, name:"Smartphone Tecno Spark 20 (128 Go)", price:75000, oldPrice:85000, category:"Électronique", badge:"Petit prix",
+    image:"https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=700&q=80",
+    description:"Écran 6,6\", 8 Go de RAM étendue, parfait pour WhatsApp, Facebook et TikTok." },
+  { id:3, name:"Samsung Galaxy A55 5G (128 Go)", price:215000, oldPrice:235000, category:"Électronique", badge:"Premium",
+    image:"https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&w=700&q=80",
+    description:"Écran AMOLED 120Hz, triple caméra 50MP, batterie 5000 mAh. Garantie 12 mois." },
+  { id:4, name:"Écouteurs Bluetooth sans fil + boîtier", price:12500, oldPrice:15000, category:"Électronique", badge:"Promo",
+    image:"https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=700&q=80",
+    description:"Son clair, basses puissantes, 20 h d'autonomie avec le boîtier de charge." },
+  { id:5, name:"Casque Bluetooth stéréo", price:14500, oldPrice:18000, category:"Électronique", badge:"Nouveau",
+    image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=700&q=80",
+    description:"Casque confortable, micro intégré, idéal musique, films et appels." },
+  { id:6, name:"Batterie externe 20 000 mAh charge rapide", price:16000, oldPrice:20000, category:"Électronique", badge:"Indispensable",
+    image:"https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=700&q=80",
+    description:"Recharge 4 fois votre téléphone. 2 sorties USB + USB-C, lampe LED." },
+  { id:7, name:"Chargeur rapide 25W + câble Type-C", price:6500, oldPrice:8500, category:"Électronique", badge:"Utile",
+    image:"https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=700&q=80",
+    description:"Charge ultra rapide, compatible Samsung, Tecno, Infinix et Xiaomi." },
+  { id:8, name:"Montre connectée + 2 bracelets", price:18500, oldPrice:25000, category:"Électronique", badge:"-26%",
+    image:"https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=700&q=80",
+    description:"Appels Bluetooth, notifications WhatsApp, suivi du cœur et du sport." },
+  { id:9, name:"Ensemble pagne / bazin élégant", price:35000, oldPrice:42000, category:"Mode", badge:"Cérémonie",
+    image:"https://images.unsplash.com/photo-1590735213920-68192a487bc2?auto=format&fit=crop&w=700&q=80",
+    description:"Tissu de qualité, motifs traditionnels. Parfait pour mariages et grandes fêtes." },
+  { id:10, name:"Boubou brodé homme (grand modèle)", price:28000, oldPrice:34000, category:"Mode", badge:"Tradition",
+    image:"https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=700&q=80",
+    description:"Boubou élégant avec broderies, très apprécié dans le Nord. Plusieurs coloris." },
+  { id:11, name:"Sac à main femme élégance", price:22000, oldPrice:null, category:"Mode", badge:"Nouveau",
+    image:"https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=700&q=80",
+    description:"Sac structuré, finitions dorées, pochette zippée. Chic au quotidien." },
+  { id:12, name:"Baskets tendance unisexe", price:17500, oldPrice:22000, category:"Mode", badge:"Confort",
+    image:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80",
+    description:"Semelle confortable et légère, pour la ville comme pour le sport." },
+  { id:13, name:"Sac à dos scolaire / voyage", price:11000, oldPrice:14000, category:"Mode", badge:"Résistant",
+    image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=700&q=80",
+    description:"Grande capacité, plusieurs poches, bretelles rembourrées. Tissu solide." },
+  { id:14, name:"Lunettes de soleil classe", price:5500, oldPrice:8000, category:"Mode", badge:"Soleil du Nord",
+    image:"https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=700&q=80",
+    description:"Protection UV, monture légère. Indispensable sous le soleil de Garoua." },
+  { id:15, name:"Lampe solaire rechargeable + ventilateur", price:14500, oldPrice:17500, category:"Maison", badge:"Anti-coupure",
+    image:"https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=700&q=80",
+    description:"Panneau solaire inclus, 3 niveaux de lumière, jusqu'à 14 h d'autonomie." },
+  { id:16, name:"Ventilateur rechargeable 12 pouces", price:24000, oldPrice:29000, category:"Maison", badge:"Chaleur du Nord",
+    image:"https://images.unsplash.com/photo-1565636192335-14c46fa1120d?auto=format&fit=crop&w=700&q=80",
+    description:"Se recharge, tient plusieurs heures pendant les coupures. 3 vitesses." },
+  { id:17, name:"Mixeur blender 1500W bol incassable", price:29000, oldPrice:34000, category:"Maison", badge:"Robuste",
+    image:"https://images.unsplash.com/photo-1570222094114-d054a817e56b?auto=format&fit=crop&w=700&q=80",
+    description:"Pour jus, sauces et condiments. Lames en inox très résistantes." },
+  { id:18, name:"Bouilloire électrique 2 L inox", price:9500, oldPrice:12000, category:"Maison", badge:"Pratique",
+    image:"https://images.unsplash.com/photo-1594213114663-d94db9b17125?auto=format&fit=crop&w=700&q=80",
+    description:"Chauffe rapide, arrêt automatique, corps en inox facile à nettoyer." },
+  { id:19, name:"Set de casseroles antiadhésives (6 pièces)", price:32000, oldPrice:38000, category:"Maison", badge:"Cuisine",
+    image:"https://images.unsplash.com/photo-1584990347449-a0a7b5e6c9dd?auto=format&fit=crop&w=700&q=80",
+    description:"Revêtement antiadhésif, manches solides. Convient à tous types de feux." },
+  { id:20, name:"Beurre de karité pur du Nord (pot 250 g)", price:3500, oldPrice:null, category:"Beauté", badge:"100% naturel",
+    image:"https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=700&q=80",
+    description:"Karité du Nord Cameroun : hydrate intensément la peau et les cheveux." },
+  { id:21, name:"Huile de coco & huile de ricin cheveux", price:4500, oldPrice:6000, category:"Beauté", badge:"Pousse & brillance",
+    image:"https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=700&q=80",
+    description:"Soin nourrissant pour cheveux crépus et bouclés, réduit la casse." },
+  { id:22, name:"Eau de parfum Oud & Ambre 100 ml", price:19500, oldPrice:24000, category:"Beauté", badge:"Tenue 24h",
+    image:"https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=700&q=80",
+    description:"Sillage boisé et chaud, flacon prestige idéal pour offrir." },
+  { id:23, name:"Coffret soin visage éclat (4 produits)", price:16500, oldPrice:21000, category:"Beauté", badge:"Coffret cadeau",
+    image:"https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=700&q=80",
+    description:"Nettoie, hydrate et illumine la peau. Un beau cadeau à offrir." },
+  { id:24, name:"Tondeuse à barbe & cheveux rechargeable", price:13500, oldPrice:17000, category:"Beauté", badge:"Barber",
+    image:"https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=700&q=80",
+    description:"Lames précises, 4 sabots, autonomie 2 h. Coupes nettes à domicile." }
+];
+/* ===================================================================== */
+</script>
+
+<!-- Bandeau -->
+<div class="bg-emerald-900 text-emerald-50 text-xs py-2 px-4 text-center font-medium">
+  🚚 Livraison à Garoua • Guider • Figuil • Mayo-Oulo • Maroua • Ngaoundéré &nbsp;|&nbsp; Paiement MTN MoMo, Orange Money ou à la livraison
+</div>
+
+<!-- Header -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+    <a href="#" class="flex items-center gap-2.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center shadow">
+        <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+      </div>
+      <div class="leading-tight">
+        <div class="fd font-extrabold text-lg text-slate-900" id="brand-name"></div>
+        <div class="text-[11px] text-slate-500 hidden sm:block">Qualité & livraison rapide dans le Nord</div>
+      </div>
+    </a>
+    <div class="hidden md:block flex-1 max-w-md relative">
+      <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+      <input id="search" oninput="setSearch(this.value)" placeholder="Rechercher un produit..." class="w-full pl-9 pr-3 py-2.5 bg-slate-100 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500">
+    </div>
+    <div class="flex items-center gap-2">
+      <a id="wa-header" target="_blank" class="hidden sm:flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1ebe5b] text-white text-sm font-semibold">
+        <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
+      </a>
+      <button onclick="openCart()" class="relative flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-sm font-semibold">
+        <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-400"></i>
+        <span class="hidden sm:inline">Panier</span>
+        <span id="cart-badge" class="bg-emerald-500 text-slate-950 text-xs font-extrabold min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </div>
+  <div class="md:hidden px-4 pb-3">
+    <input oninput="setSearch(this.value)" placeholder="Rechercher un produit..." class="w-full px-4 py-2.5 bg-slate-100 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500">
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white">
+  <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-emerald-400/20 blur-3xl"></div>
+  <div class="absolute bottom-0 left-0 w-72 h-72 rounded-full bg-amber-400/10 blur-3xl"></div>
+  <div class="max-w-7xl mx-auto px-4 py-12 sm:py-16 relative">
+    <div class="max-w-2xl space-y-5">
+      <span class="inline-flex items-center gap-2 bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-full text-xs sm:text-sm text-emerald-300">
+        <i data-lucide="map-pin" class="w-4 h-4 text-amber-400"></i> Garoua • Guider • Figuil • Mayo-Oulo • Maroua • Ngaoundéré
+      </span>
+      <h1 class="fd text-3xl sm:text-5xl font-extrabold leading-tight">
+        Les bonnes affaires, <span class="text-amber-400">livrées chez vous</span>.
+      </h1>
+      <p class="text-slate-300 text-sm sm:text-base">
+        Téléphones, mode, maison et beauté. Choisissez vos articles, validez la commande sur WhatsApp et payez par <b class="text-[#FFCC00]">MTN MoMo</b>, <b class="text-[#FF7900]">Orange Money</b> ou à la livraison.
+      </p>
+      <div class="flex flex-wrap gap-3 pt-1">
+        <a href="#catalogue" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg">Voir les produits</a>
+        <a id="wa-hero" target="_blank" class="px-6 py-3 bg-[#25D366] hover:bg-[#1ebe5b] text-white font-bold rounded-xl text-sm flex items-center gap-2">
+          <i data-lucide="message-circle" class="w-4 h-4"></i> Écrire sur WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Réassurance -->
+<section class="bg-white border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 py-5 grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs sm:text-sm">
+    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center"><i data-lucide="truck" class="w-5 h-5"></i></div><div><b>Livraison rapide</b><div class="text-slate-500 text-xs">6 villes desservies</div></div></div>
+    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="smartphone" class="w-5 h-5"></i></div><div><b>MoMo & Orange Money</b><div class="text-slate-500 text-xs">Ou cash à la livraison</div></div></div>
+    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center"><i data-lucide="badge-check" class="w-5 h-5"></i></div><div><b>Produits vérifiés</b><div class="text-slate-500 text-xs">Contrôlés avant envoi</div></div></div>
+    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-green-100 text-green-700 flex items-center justify-center"><i data-lucide="message-circle" class="w-5 h-5"></i></div><div><b>Service WhatsApp</b><div class="text-slate-500 text-xs" id="wa-display-strip"></div></div></div>
+  </div>
+</section>
+
+<!-- Catalogue -->
+<section id="catalogue" class="max-w-7xl mx-auto px-4 pt-10 pb-4">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h2 class="fd text-2xl font-extrabold text-slate-900">Nos produits</h2>
+      <p id="count" class="text-sm text-slate-500"></p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div id="cats" class="flex gap-2 overflow-x-auto no-scrollbar"></div>
+      <select onchange="setSort(this.value)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm shrink-0 outline-none">
+        <option value="">Populaires</option>
+        <option value="asc">Prix croissant</option>
+        <option value="desc">Prix décroissant</option>
+      </select>
+    </div>
+  </div>
+</section>
+<section class="max-w-7xl mx-auto px-4 pb-16">
+  <div id="grid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6"></div>
+  <p id="empty" class="hidden text-center text-slate-500 py-16">Aucun produit trouvé.</p>
+</section>
+
+<!-- Comment commander -->
+<section class="bg-white border-t border-slate-200 py-12">
+  <div class="max-w-5xl mx-auto px-4">
+    <h2 class="fd text-2xl font-extrabold text-center mb-8">Comment commander ?</h2>
+    <div class="grid sm:grid-cols-3 gap-6 text-center">
+      <div class="p-5 rounded-2xl bg-slate-50"><div class="w-12 h-12 mx-auto rounded-full bg-emerald-600 text-white font-extrabold flex items-center justify-center mb-3">1</div><b>Choisissez</b><p class="text-sm text-slate-500 mt-1">Ajoutez vos articles au panier et choisissez votre ville.</p></div>
+      <div class="p-5 rounded-2xl bg-slate-50"><div class="w-12 h-12 mx-auto rounded-full bg-emerald-600 text-white font-extrabold flex items-center justify-center mb-3">2</div><b>Envoyez sur WhatsApp</b><p class="text-sm text-slate-500 mt-1">Votre commande arrive directement chez nous, déjà rédigée.</p></div>
+      <div class="p-5 rounded-2xl bg-slate-50"><div class="w-12 h-12 mx-auto rounded-full bg-emerald-600 text-white font-extrabold flex items-center justify-center mb-3">3</div><b>Payez & recevez</b><p class="text-sm text-slate-500 mt-1">MTN MoMo, Orange Money ou cash à la livraison.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-slate-950 text-slate-400">
+  <div class="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-3 gap-8 text-sm">
+    <div><div class="fd font-extrabold text-white text-lg mb-2" id="foot-brand"></div><p class="text-xs leading-relaxed">Boutique en ligne gérée par <span id="foot-owner"></span>. Prix en francs CFA (FCFA).</p></div>
+    <div><h4 class="text-white font-bold mb-2">Villes desservies</h4><p class="text-xs">Garoua • Guider • Figuil • Mayo-Oulo • Maroua • Ngaoundéré</p></div>
+    <div><h4 class="text-white font-bold mb-2">Contact</h4><a id="wa-footer" target="_blank" class="text-emerald-400 font-semibold"></a><p class="text-xs mt-1">Paiement : MTN MoMo • Orange Money • Cash à la livraison</p></div>
+  </div>
+  <div class="border-t border-slate-800 py-4 text-center text-xs" id="copyright"></div>
+</footer>
+
+<!-- Bouton WhatsApp flottant -->
+<a id="wa-float" target="_blank" class="fixed bottom-5 left-5 z-30 w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#1ebe5b] text-white shadow-xl flex items-center justify-center" title="Écrire sur WhatsApp">
+  <i data-lucide="message-circle" class="w-7 h-7"></i>
+</a>
+
+<!-- Panier -->
+<div id="backdrop" onclick="closeCart()" class="fixed inset-0 z-40 bg-slate-950/50 hidden"></div>
+<aside id="drawer" class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white shadow-2xl translate-x-full transition-transform duration-300 flex flex-col">
+  <div class="px-5 py-4 border-b flex items-center justify-between bg-slate-50">
+    <h2 class="fd font-bold text-lg flex items-center gap-2"><i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-600"></i> Mon panier</h2>
+    <button onclick="closeCart()" class="p-2 rounded-lg hover:bg-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
+  </div>
+  <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+  <div id="cart-footer" class="border-t bg-slate-50 p-5 space-y-3">
+    <div>
+      <label class="text-xs font-bold text-slate-700">Ville de livraison</label>
+      <select id="city" onchange="setCity(this.value)" class="mt-1 w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:border-emerald-500"></select>
+    </div>
+    <div class="text-sm space-y-1">
+      <div class="flex justify-between text-slate-600"><span>Sous-total</span><span id="subtotal" class="font-semibold text-slate-900"></span></div>
+      <div class="flex justify-between text-slate-600"><span>Livraison</span><span id="shipping" class="font-semibold text-slate-900"></span></div>
+      <div class="flex justify-between text-base font-extrabold pt-2 border-t"><span>Total</span><span id="total" class="text-emerald-700 text-lg"></span></div>
+    </div>
+    <button onclick="openCheckout()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
+      Commander <i data-lucide="arrow-right" class="w-4 h-4"></i>
+    </button>
+  </div>
+</aside>
+
+<!-- Commande -->
+<div id="checkout" class="fixed inset-0 z-50 hidden items-center justify-center p-3 bg-slate-950/70 overflow-y-auto">
+  <div class="bg-white rounded-3xl max-w-lg w-full my-auto shadow-2xl overflow-hidden">
+    <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+      <h3 class="fd font-bold">Finaliser ma commande</h3>
+      <button onclick="closeCheckout()" class="p-1.5 rounded-lg hover:bg-white/10"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <form onsubmit="sendOrder(event)" class="p-5 space-y-4">
+      <div>
+        <label class="text-xs font-bold text-slate-700">Votre nom *</label>
+        <input id="c-name" required class="mt-1 w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white" placeholder="Ex : Aminatou Bello">
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-700">Votre téléphone *</label>
+        <div class="flex mt-1">
+          <span class="px-3 flex items-center rounded-l-xl border border-r-0 border-slate-200 bg-slate-100 text-sm font-bold">+237</span>
+          <input id="c-phone" required maxlength="9" pattern="6[0-9]{8}" inputmode="numeric" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-r-xl text-sm outline-none focus:border-emerald-500 focus:bg-white" placeholder="6XXXXXXXX">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-700">Quartier et point de repère *</label>
+        <input id="c-address" required class="mt-1 w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white" placeholder="Ex : Poumpoumré, près du stade">
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-700">Mode de paiement</label>
+        <div class="grid grid-cols-3 gap-2 mt-1.5" id="pay-options">
+          <label class="cursor-pointer"><input type="radio" name="pay" value="MTN MoMo" class="peer hidden" checked><div class="p-2.5 rounded-xl border-2 border-slate-200 peer-checked:border-[#FFCC00] peer-checked:bg-[#FFCC00]/15 text-center text-xs font-bold">MTN MoMo</div></label>
+          <label class="cursor-pointer"><input type="radio" name="pay" value="Orange Money" class="peer hidden"><div class="p-2.5 rounded-xl border-2 border-slate-200 peer-checked:border-[#FF7900] peer-checked:bg-[#FF7900]/10 text-center text-xs font-bold">Orange Money</div></label>
+          <label class="cursor-pointer"><input type="radio" name="pay" value="Cash à la livraison" class="peer hidden"><div class="p-2.5 rounded-xl border-2 border-slate-200 peer-checked:border-slate-800 peer-checked:bg-slate-100 text-center text-xs font-bold">À la livraison</div></label>
+        </div>
+        <p id="pay-hint" class="text-xs text-slate-500 mt-2"></p>
+      </div>
+      <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 flex justify-between items-center text-sm">
+        <span class="text-emerald-900">Total à payer</span><b id="co-total" class="text-emerald-700 text-lg"></b>
+      </div>
+      <button type="submit" class="w-full py-3.5 bg-[#25D366] hover:bg-[#1ebe5b] text-white font-bold rounded-xl flex items-center justify-center gap-2">
+        <i data-lucide="message-circle" class="w-5 h-5"></i> Envoyer ma commande sur WhatsApp
+      </button>
+      <p class="text-[11px] text-slate-400 text-center">WhatsApp s'ouvre avec votre commande déjà rédigée. Appuyez sur « Envoyer ».</p>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-5 right-5 z-[60] hidden bg-slate-900 text-white text-sm px-4 py-3 rounded-2xl shadow-xl"></div>
+
+<script>
+const fmt = n => Number(n).toLocaleString('fr-FR') + ' FCFA';
+let cart = [], cat = "Tout", q = "", sort = "", city = CITIES[0].name;
+try { cart = JSON.parse(localStorage.getItem('ebedai_cart')) || []; city = localStorage.getItem('ebedai_city') || city; } catch(e){}
+if (!CITIES.find(c => c.name === city)) city = CITIES[0].name;
+const save = () => { try { localStorage.setItem('ebedai_cart', JSON.stringify(cart)); localStorage.setItem('ebedai_city', city); } catch(e){} };
+const waLink = (text) => `https://wa.me/${CONFIG.whatsapp}` + (text ? `?text=${encodeURIComponent(text)}` : '');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.remove('hidden'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.add('hidden'),2500); }
+
+function renderStatic(){
+  document.getElementById('brand-name').innerHTML = esc(CONFIG.shopName).replace('Ebedaï','Ebedaï<span class="text-emerald-600"></span>');
+  document.getElementById('foot-brand').textContent = CONFIG.shopName;
+  document.getElementById('foot-owner').textContent = CONFIG.owner;
+  document.getElementById('wa-display-strip').textContent = CONFIG.whatsappDisplay;
+  const hello = `Bonjour ${CONFIG.owner}, je souhaite avoir des informations sur vos produits.`;
+  ['wa-header','wa-hero','wa-float','wa-footer'].forEach(id => document.getElementById(id).href = waLink(hello));
+  document.getElementById('wa-footer').textContent = 'WhatsApp : ' + CONFIG.whatsappDisplay;
+  document.getElementById('copyright').textContent = `© ${new Date().getFullYear()} ${CONFIG.shopName} — ${CONFIG.owner}. Tous droits réservés.`;
+  document.getElementById('city').innerHTML = CITIES.map(c => `<option value="${c.name}" ${c.name===city?'selected':''}>${c.name} — livraison ${fmt(c.fee)}</option>`).join('');
+}
+
+function renderCats(){
+  document.getElementById('cats').innerHTML = CATEGORIES.map(c =>
+    `<button onclick="setCat('${c}')" class="px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap ${c===cat?'bg-emerald-600 text-white shadow':'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'}">${c}</button>`).join('');
+}
+const setCat = c => { cat=c; renderCats(); renderProducts(); };
+const setSearch = v => { q=v.trim().toLowerCase(); renderProducts(); };
+const setSort = v => { sort=v; renderProducts(); };
+
+function renderProducts(){
+  let list = PRODUCTS.filter(p => (cat==="Tout"||p.category===cat) && (!q || (p.name+p.description+p.category).toLowerCase().includes(q)));
+  if (sort==="asc") list.sort((a,b)=>a.price-b.price);
+  if (sort==="desc") list.sort((a,b)=>b.price-a.price);
+  document.getElementById('count').textContent = `${list.length} article${list.length>1?'s':''}`;
+  document.getElementById('empty').classList.toggle('hidden', list.length>0);
+  document.getElementById('grid').innerHTML = list.map(p => {
+    const fb = `https://placehold.co/600x450/0f172a/10b981?text=${encodeURIComponent(p.name.slice(0,16))}`;
+    const disc = p.oldPrice ? Math.round((1 - p.price/p.oldPrice)*100) : 0;
+    return `
+    <article class="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col">
+      <div class="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+        <img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${fb}'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        ${p.badge?`<span class="absolute top-2 left-2 bg-slate-900/85 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg">${esc(p.badge)}</span>`:''}
+        ${disc?`<span class="absolute top-2 right-2 bg-red-600 text-white text-[11px] font-extrabold px-2 py-1 rounded-lg">-${disc}%</span>`:''}
+      </div>
+      <div class="p-3 sm:p-4 flex-1 flex flex-col justify-between gap-3">
+        <div>
+          <span class="text-[11px] font-semibold text-emerald-700">${p.category}</span>
+          <h3 class="fd font-bold text-sm sm:text-base text-slate-900 line-clamp-2 mt-0.5">${esc(p.name)}</h3>
+          <p class="text-xs text-slate-500 line-clamp-2 mt-1 hidden sm:block">${esc(p.description)}</p>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-baseline gap-2 flex-wrap">
+            <span class="fd font-extrabold text-base sm:text-lg text-slate-900">${fmt(p.price)}</span>
+            ${p.oldPrice?`<span class="text-xs text-slate-400 line-through">${fmt(p.oldPrice)}</span>`:''}
+          </div>
+          <button onclick="addToCart(${p.id})" class="w-full py-2.5 bg-slate-900 hover:bg-emerald-600 text-white font-semibold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors">
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i> Ajouter
+          </button>
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+const fee = () => (CITIES.find(c=>c.name===city)||CITIES[0]).fee;
+function totals(){
+  const sub = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const ship = cart.length ? fee() : 0;
+  return { sub, ship, total: sub+ship, n: cart.reduce((s,i)=>s+i.qty,0) };
+}
+function addToCart(id){
+  const p = PRODUCTS.find(x=>x.id===id); if(!p) return;
+  const it = cart.find(i=>i.id===id);
+  it ? it.qty++ : cart.push({id:p.id,name:p.name,price:p.price,image:p.image,qty:1});
+  save(); renderCart(); toast('Ajouté au panier ✓');
+}
+function qty(id,d){ const i=cart.findIndex(x=>x.id===id); if(i<0) return; cart[i].qty+=d; if(cart[i].qty<=0) cart.splice(i,1); save(); renderCart(); }
+function setCity(c){ city=c; save(); document.getElementById('city').value=c; renderCart(); }
+
+function renderCart(){
+  const t = totals();
+  document.getElementById('cart-badge').textContent = t.n;
+  const box = document.getElementById('cart-items'), foot = document.getElementById('cart-footer');
+  if(!cart.length){
+    foot.classList.add('hidden');
+    box.innerHTML = `<div class="text-center py-16"><div class="w-16 h-16 mx-auto rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-3"><i data-lucide="shopping-bag" class="w-8 h-8"></i></div><b>Votre panier est vide</b><p class="text-xs text-slate-500 mt-1">Ajoutez des produits pour commander.</p></div>`;
+  } else {
+    foot.classList.remove('hidden');
+    box.innerHTML = cart.map(i => `
+      <div class="flex gap-3 p-3 rounded-2xl border border-slate-200">
+        <img src="${esc(i.image)}" onerror="this.onerror=null;this.src='https://placehold.co/150x150/0f172a/10b981?text=%F0%9F%9B%8D'" class="w-16 h-16 rounded-xl object-cover bg-slate-100">
+        <div class="flex-1 min-w-0">
+          <div class="flex justify-between gap-2"><h4 class="text-sm font-bold line-clamp-2">${esc(i.name)}</h4>
+            <button onclick="qty(${i.id},-999)" class="text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
+          <div class="flex items-center justify-between mt-2">
+            <div class="inline-flex items-center bg-slate-100 rounded-lg p-0.5">
+              <button onclick="qty(${i.id},-1)" class="w-7 h-7 font-bold hover:bg-white rounded-md">−</button>
+              <span class="px-2.5 text-sm font-bold">${i.qty}</span>
+              <button onclick="qty(${i.id},1)" class="w-7 h-7 font-bold hover:bg-white rounded-md">+</button>
+            </div>
+            <b class="text-sm text-emerald-700">${fmt(i.price*i.qty)}</b>
+          </div>
+        </div>
+      </div>`).join('');
+    document.getElementById('subtotal').textContent = fmt(t.sub);
+    document.getElementById('shipping').textContent = fmt(t.ship);
+    document.getElementById('total').textContent = fmt(t.total);
+  }
+  lucide.createIcons();
+}
+function openCart(){ document.getElementById('backdrop').classList.remove('hidden'); document.getElementById('drawer').classList.remove('translate-x-full'); }
+function closeCart(){ document.getElementById('backdrop').classList.add('hidden'); document.getElementById('drawer').classList.add('translate-x-full'); }
+
+function payHint(){
+  const v = document.querySelector('input[name=pay]:checked').value;
+  const h = document.getElementById('pay-hint');
+  if (v==="MTN MoMo") h.textContent = CONFIG.momoNumber ? `Après la commande, envoyez le montant au ${CONFIG.momoNumber} (${CONFIG.momoName}).` : "Nous vous enverrons sur WhatsApp le numéro MTN MoMo où payer.";
+  else if (v==="Orange Money") h.textContent = CONFIG.omNumber ? `Après la commande, envoyez le montant au ${CONFIG.omNumber} (${CONFIG.momoName}).` : "Nous vous enverrons sur WhatsApp le numéro Orange Money où payer.";
+  else h.textContent = "Vous payez en espèces au livreur à la réception.";
+}
+function openCheckout(){
+  if(!cart.length) return;
+  closeCart();
+  document.getElementById('co-total').textContent = fmt(totals().total);
+  payHint();
+  const m = document.getElementById('checkout'); m.classList.remove('hidden'); m.classList.add('flex');
+}
+function closeCheckout(){ const m=document.getElementById('checkout'); m.classList.add('hidden'); m.classList.remove('flex'); }
+document.addEventListener('change', e => { if(e.target.name==='pay') payHint(); });
+
+function sendOrder(e){
+  e.preventDefault();
+  const t = totals();
+  const name = document.getElementById('c-name').value.trim();
+  const phone = document.getElementById('c-phone').value.trim();
+  const addr = document.getElementById('c-address').value.trim();
+  const pay = document.querySelector('input[name=pay]:checked').value;
+  const lines = cart.map(i => `• ${i.qty} x ${i.name} — ${fmt(i.price*i.qty)}`).join('\n');
+  let payLine = pay;
+  if (pay==="MTN MoMo" && CONFIG.momoNumber) payLine += ` (je paie au ${CONFIG.momoNumber})`;
+  if (pay==="Orange Money" && CONFIG.omNumber) payLine += ` (je paie au ${CONFIG.omNumber})`;
+  const msg =
+`🛍️ *NOUVELLE COMMANDE — ${CONFIG.shopName}*
+
+${lines}
+
+Sous-total : ${fmt(t.sub)}
+Livraison (${city}) : ${fmt(t.ship)}
+*TOTAL : ${fmt(t.total)}*
+
+👤 Nom : ${name}
+📞 Téléphone : +237 ${phone}
+📍 Livraison : ${city} — ${addr}
+💳 Paiement : ${payLine}
+
+Merci de me confirmer la disponibilité et le délai.`;
+  window.open(waLink(msg), '_blank');
+  cart = []; save(); renderCart(); closeCheckout();
+  toast('Commande envoyée sur WhatsApp ✓');
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeCart(); closeCheckout(); } });
+renderStatic(); renderCats(); renderProducts(); renderCart(); lucide.createIcons();
+</script>
+</body>
+</html>
